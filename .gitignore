@@ -24,11 +24,12 @@ competition/cowboy-*/
 data
 dist/
 ebin/
-node_modules
+node_modules/
+priv/
 results/
+src/
 stats/*.Rout
 stats/*.csv
 stats/db
 stats/stat_results/
-Vagrantfile
 erl_crash.dump
