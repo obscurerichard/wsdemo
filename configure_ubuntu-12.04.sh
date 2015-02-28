@@ -4,9 +4,8 @@
 # Use bash unofficial strict mode
 set -eou pipefail
 IFS=$'\n\t'
-# Credit to Stack Overflow user Dave Dopson http://stackoverflow.com/a/246128/424301
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-BASENAME=$(basename $0)
+
+BASENAME=$(basename "$0")
 REPO="git://github.com/ericmoritz/wsdemo.git"
 
 # Allow repo to be cloned to be passed as argument
@@ -29,8 +28,8 @@ if [ -f "/vagrant/$BASENAME" ]; then
     WSDEMO="/vagrant"
 else
     # Clone master
-    git clone "$repo" wsdemo
     WSDEMO=wsdemo
+    git clone "$repo" "$WSDEMO"
 fi
 
 # Update sysctl
@@ -49,13 +48,14 @@ popd
 # install Node
 node=$(which node)
 if [ "$node" == "" ]; then
-  mkdir -p "$DIR"/src
-  pushd "$DIR"/src
+    TMPDIR=$(mktemp -tdq nodecompile.XXXXXX)
+    pushd "$TMPDIR"
     curl http://nodejs.org/dist/v0.8.0/node-v0.8.0.tar.gz | tar xz
     pushd node-v0.8.0
       ./configure && make && sudo make install
     popd
   popd
+  rm -rf "$TMPDIR"
 fi
 
 # install Play
@@ -77,4 +77,5 @@ sudo gem install em-websocket
 sudo cabal update
 sudo cabal install snap-server snap-core websockets websockets-snap
 
+# Install Perl dependencies
 sudo cpanm Protocol::WebSocket YAML EV EV::ADNS IO::Stream
