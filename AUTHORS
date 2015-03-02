@@ -27,3 +27,4 @@ individual Websocket projects and wsdemo implementations:
 ## Other contributions
 
   * Jesper Louis Andersen - For the stats/ code <https://github.com/jlouis>
+  * Richard Bullington-McGuire - For Vagrant support and Makefile enhancements <https://github.com/obscurerichard>
