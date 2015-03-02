@@ -1,36 +1,89 @@
-.PHONY: 
-	echo "make server | client"
+.PHONY: all apt-get-update client client-env config go-deps \
+	perl-deps python-deps ruby-deps report server server-deps stats
 
-server: server-deps config
-	$(MAKE) -C competition server
+all:
+	@echo "syntax: make <server|client>"
+
+apt-get-update:
+	sudo apt-get update
+
+client: client-env
+	./rebar get-deps compile
+
+client-env: apt-get-update
+	sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+		build-essential \
+		curl \
+		erlang-dev \
+		erlang-nox \
+		git \
+		libadns1-dev \
+		libevent-dev \
+		unzip
 
 config:
 	sudo cp etc/sysctl.conf /etc/
 	sudo sysctl -p
 
-server-deps:
-	sudo apt-get update
-	sudo apt-get install -y \
-	    curl emacs unzip python-dev python-setuptools build-essential erlang-nox erlang-dev \
-	    libevent-dev git golang mercurial openjdk-7-jdk ruby rubygems haskell-platform  libadns1-dev
-	echo -e "y\ny\no conf prerequisites_policy follow\no conf commit" | sudo cpan
-	sudo cpan Protocol::WebSocket
-	sudo cpan YAML
-	sudo cpan EV
-	sudo cpan EV::ADNS
-	yes | sudo cpan IO::Stream
-	sudo easy_install pip ws4py gevent gevent-websocket tornado twisted txws supervisor priv/wsdemo_monitor
+go-deps:
 	sudo go get code.google.com/p/go.net/websocket
-	sudo gem install em-websocket
+
+haskell-deps:
 	sudo cabal update
 	sudo cabal install snap-server snap-core websockets websockets-snap
 
+perl-deps:
+	sudo cpanm \
+		EV \
+		EV::ADNS \
+		IO::Stream \
+		Protocol::WebSocket \
+		YAML
 
-client:
-	./rebar get-deps compile
+python-deps:
+	sudo easy_install \
+		gevent \
+		gevent-websocket \
+		pip \
+		priv/wsdemo_monitor \
+		supervisor \
+		tornado \
+		twisted \
+		txws \
+		ws4py
 
 report:
 	./bin/compile_all_stats.sh
+
+ruby-deps:
+	sudo gem install em-websocket --no-ri --no-rdoc
+
+server: server-deps config
+	$(MAKE) -C competition server
+
+server-env: apt-get-update
+	sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+		build-essential \
+		curl \
+		cpanminus \
+		emacs \
+		erlang-dev \
+		erlang-nox \
+		git \
+		golang \
+		haskell-platform \
+		libadns1-dev \
+		libevent-dev \
+		mercurial \
+		openjdk-7-jdk \
+		python-dev \
+		python-setuptools \
+		ruby \
+		rubygems \
+		unzip
+
+server-deps: server-env \
+	haskell-deps perl-deps python-deps ruby-deps
 
 stats:
 	$(MAKE) -C stats stats
