@@ -63,13 +63,13 @@ Next compile the code on both machines:
 
 To run a single benchmark on a server do the following:
 
-    ./runtest db_path duration hostname port client_count
+    ./runtest db_path hostname port client_count duration
 
 For instance for a benchmark of 192.168.1.5:8000 of 1000 clients lasting 60
 seconds with with the data stored at `data/myserver` the command would
 be:
 
-    ./runtest data/myserver 60 192.168.1.5 8000 1000
+    ./runtest data/myserver 192.168.1.5 8000 1000 60
 
 
 ## Running the entire suite on your own servers
