@@ -40,6 +40,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       sudo apt-get install make
       cd /vagrant
       make server
+      sudo killall supervisord
+      sudo competition/start-supervisord.sh
       EOF
   end
 
