@@ -1,4 +1,8 @@
-.PHONY: all clean distclean node-deps node-ws play pypy server
+.PHONY: all clean distclean node-deps node-ws play pypy
+
+NODE_VERSION=0.8.21
+NODE_DIR=node-v$(NODE_VERSION)
+NODE_SRC=$(NODE_DIR).tar.gz
 
 all: EchoWsServer.class node-deps play pypy wsdemo.beam wsdemo-snap wsdemo-go-gonet
 
@@ -7,7 +11,7 @@ clean:
 	$(MAKE) -C wsdemo-playframework-2 clean
 
 distclean: clean
-	sudo rm -rf pypy-1.9 node-v0.8.21 distribute*.tar.gz wsdemo-playframework-2 /usr/local/bin/node /usr/local/bin/npm
+	sudo rm -rf pypy-1.9 $(NODE_DIR) distribute*.tar.gz wsdemo-playframework-2 /usr/local/bin/node /usr/local/bin/npm
 
 # Erlang
 wsdemo.beam:
@@ -28,24 +32,24 @@ EchoWsServer.class: EchoWsServer.java
 # Scala
 play: wsdemo-playframework-2/dist/wsdemo-1.0-SNAPSHOT.zip
 
-wsdemo-playframework-2/dist/wsdemo-1.0-SNAPSHOT.zip:
+wsdemo-playframework-2/dist/wsdemo-1.0-SNAPSHOT.zip: play-2.0.1.zip
 	unzip -u play-2.0.1.zip
 	$(MAKE) -C wsdemo-playframework-2
 
 # Node.JS
 node-deps: /usr/local/bin/node node-ws
 
-/usr/local/bin/node:
-	tar xzf node-v0.8.21.tar.gz
-	cd node-v0.8.21 && ./configure && make && sudo make install
+/usr/local/bin/node: $(NODE_SRC)
+	tar xzf $(NODE_SRC)
+	cd $(NODE_DIR) && ./configure && make && sudo make install 
 
 node-ws:
 	npm install websocket ws
 
-# Python
+# PyPy
 pypy: pypy-1.9/bin/pypy
 
-pypy-1.9/bin/pypy:
+pypy-1.9/bin/pypy: pypy-1.9-linux64.tar.bz2
 	tar xjf pypy-1.9-linux64.tar.bz2
 	./pypy-1.9/bin/pypy distribute_setup.py
 	./pypy-1.9/bin/easy_install pip

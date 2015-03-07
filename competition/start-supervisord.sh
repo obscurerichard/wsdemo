@@ -3,4 +3,10 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ulimit -n 99999
 cd "$DIR"
-supervisord -c supervisord.conf
+supervisord="$(ps aux | grep 'supervisord -c supervisord.conf' | grep -v grep)"
+if [ "$supervisord" == "" ]; then
+  supervisord -c supervisord.conf
+else
+  echo "supervisord already started:"
+  echo "$supervisord"
+fi

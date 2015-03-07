@@ -1,9 +1,18 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+require 'fileutils'
 
 VAGRANTFILE_API_VERSION = "2"
-client_hostname="wsdemo-client"
-server_hostname="wsdemo-server"
+
+HOSTS=[ 
+  { :hostname => 'client', :ip => '192.168.99.10' },
+  { :hostname => 'server', :ip => '192.168.99.20' },
+]
+
+OUTDIRS = [ 'data/vagrant', 'data/vagrant-small']
+OUTDIRS.each do |outdir|
+  FileUtils.mkdir_p outdir
+end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # See online documentation at vagrantup.com for more options.
@@ -17,32 +26,28 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # config.vm.define "default"
 
-  config.vm.define "client" do |client|
-    config.vm.network "private_network", ip: "192.168.99.1"
-    config.vm.provision "shell", inline: <<-EOF
-      sudo sed -i -e '/#{client_hostname}/d' /etc/hosts
-      sudo sed -i -e '2a127.0.2.1   #{client_hostname}' /etc/hosts
-      sudo hostname #{client_hostname}
+  HOSTS.each do |host|
+  config.vm.define host[:hostname] do |box|
+    box.vm.hostname = host[:hostname]
+    box.vm.network "private_network", ip: host[:ip]
+    HOSTS.each do |host|
+      box.vm.provision "shell", inline: <<-EOF
+        sudo sed -i -e '/#{host[:hostname]}/d' /etc/hosts
+        sudo sed -i -e '2a#{host[:ip]}  #{host[:hostname]}' /etc/hosts
+      EOF
+    end
+    box.vm.provision "shell", inline: <<-EOF
       sudo apt-get update
       sudo apt-get install make
       cd /vagrant
-      make client
+      make "#{host[:hostname]}"
+    EOF
+    if host[:hostname] == "server"
+      box.vm.provision "shell", inline: <<-EOF
+        sudo /vagrant/competition/start-supervisord.sh
       EOF
+    end
   end
-
-  config.vm.define "server" do |server|
-    config.vm.network "private_network", ip: "192.168.99.2"
-    config.vm.provision "shell", inline: <<-EOF
-      sudo sed -i -e '/#{server_hostname}/d' /etc/hosts
-      sudo sed -i -e '2a127.0.3.1   #{server_hostname}' /etc/hosts
-      sudo hostname #{server_hostname}
-      sudo apt-get update
-      sudo apt-get install make
-      cd /vagrant
-      make server
-      sudo killall supervisord
-      sudo competition/start-supervisord.sh
-      EOF
   end
 
 end

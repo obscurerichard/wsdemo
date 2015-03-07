@@ -59,7 +59,7 @@ ruby-deps:
 	sudo gem install em-websocket --no-ri --no-rdoc
 
 server: server-deps config
-	$(MAKE) -C competition server
+	$(MAKE) -C competition
 
 server-env: apt-get-update
 	sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
