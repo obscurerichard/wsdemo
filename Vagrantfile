@@ -44,7 +44,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     EOF
     if host[:hostname] == "server"
       box.vm.provision "shell", inline: <<-EOF
-        sudo /vagrant/competition/start-supervisord.sh
+        /vagrant/competition/start-supervisord.sh
       EOF
     end
   end
